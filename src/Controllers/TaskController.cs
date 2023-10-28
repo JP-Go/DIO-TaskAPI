@@ -21,7 +21,7 @@ namespace Organizer.Controllers
         {
             _context.Tasks.Add(task);
             _context.SaveChanges();
-            return Ok(task);
+            return CreatedAtAction(nameof(GetTaskById), new { id = task.Id }, task);
         }
 
         [HttpGet("ObterTodos")]
@@ -73,6 +73,48 @@ namespace Organizer.Controllers
                 return NotFound("Entity not found");
             }
             return Ok(task);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateTask(int id, Task task)
+        {
+            var existingTask = _context.Tasks.Find(id);
+            if (existingTask == null)
+            {
+                return NotFound("Entity not found");
+            }
+            if (
+                task.Data == null
+                || task.Titulo == null
+                || task.Descricao == null
+                || task.Status.Equals(null)
+            )
+            {
+                return BadRequest("Missing task fields");
+            }
+            existingTask.Data = task.Data;
+            existingTask.Descricao = task.Descricao;
+            existingTask.Titulo = task.Titulo;
+            existingTask.Status = task.Status;
+
+            _context.Tasks.Update(existingTask);
+            _context.SaveChanges();
+
+            return Ok(existingTask);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTask(int id)
+        {
+            var existingTask = _context.Tasks.Find(id);
+            if (existingTask == null)
+            {
+                return NotFound("Entity not found");
+            }
+            _context.Remove(existingTask);
+            _context.SaveChanges();
+
+            return NoContent();
         }
     }
 }
