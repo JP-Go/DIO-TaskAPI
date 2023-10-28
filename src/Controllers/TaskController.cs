@@ -9,10 +9,70 @@ namespace Organizer.Controllers
     [Route("[controller]")]
     public class TarefaController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult Hello()
+        private readonly TaskContext _context;
+
+        public TarefaController(TaskContext context)
         {
-            return Ok("Hello, World!");
+            _context = context;
+        }
+
+        [HttpPost]
+        public IActionResult CreateTask(Task task)
+        {
+            _context.Tasks.Add(task);
+            _context.SaveChanges();
+            return Ok(task);
+        }
+
+        [HttpGet("ObterTodos")]
+        public IActionResult GetAllTasks()
+        {
+            var tasks = _context.Tasks.ToList();
+            return Ok(tasks);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetTaskById(int id)
+        {
+            var task = _context.Tasks.Find(id);
+            if (task == null)
+            {
+                return NotFound("Entity not found");
+            }
+            return Ok(task);
+        }
+
+        [HttpGet("ObterPorTitulo")]
+        public IActionResult FindByTitle(string titulo)
+        {
+            var task = _context.Tasks.Where(x => x.Titulo.Contains(titulo));
+            if (task == null)
+            {
+                return NotFound("Entity not found");
+            }
+            return Ok(task);
+        }
+
+        [HttpGet("ObterPorData")]
+        public IActionResult FindByDate(DateTime date)
+        {
+            var task = _context.Tasks.Where(x => x.Data.Date == date.Date);
+            if (task == null)
+            {
+                return NotFound("Entity not found");
+            }
+            return Ok(task);
+        }
+
+        [HttpGet("ObterPorStatus")]
+        public IActionResult FindByStatus(TaskStatus status)
+        {
+            var task = _context.Tasks.Where(x => x.Status.Equals(status));
+            if (task == null)
+            {
+                return NotFound("Entity not found");
+            }
+            return Ok(task);
         }
     }
 }
